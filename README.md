@@ -1,237 +1,207 @@
 # binarySKILL
 
-**Universal Binary and Combinatorial Generator for Training LLMs**
+**Binary Arithmetic Training with Circled Digit Notation (⓪①)**
 
-This repository provides maximally general generators for binary operations and combinatorial objects, with a focus on teaching counting principles through bijections.
+Train LLMs to perform binary arithmetic using visually distinct ⓪① notation instead of standard 01. This helps models learn binary as a separate domain from decimal arithmetic.
 
-## Core Philosophy
+## Why Circled Digits?
 
-**Binary ↔ Subsets ↔ Counting**
+Using **⓪** and **①** instead of `0` and `1` makes binary operations visually distinctive:
 
-Every C(n,k) object has multiple equivalent representations:
-- Binary strings with k ones
-- k-subsets of [n]
-- Lattice paths
-- Committee selections
-- Stars-and-bars distributions
+```
+Standard binary:  1011 + 0110 = 10001
+Circled binary:   ①⓪①① + ⓪①①⓪ = ①⓪⓪⓪①
+```
 
-All generators are **deterministic** (seed-based) and **bijectively equivalent**.
+This visual separation helps LLMs:
+- Distinguish binary from decimal operations
+- Avoid confusion with standard arithmetic
+- Learn binary-specific reasoning patterns
 
 ## Quick Start
 
 ```python
-from generators.binomial_generator import generate_binomial_object_full
+from toolkit.binary_arithmetic import add, subtract, bitwise_and
 
-# Generate C(8,3) object with all representations
-obj = generate_binomial_object_full(n=8, k=3, seed=42)
+# Addition
+result = add('①⓪①①', '⓪①①⓪')
+print(result)
+# {'result': '①⓪⓪⓪①', 'decimal': 17}
 
-print(obj.indices)              # [0, 1, 5]
-print(obj.to_binary())          # '11000100'
-print(obj.to_lattice_path())    # 'RRUUURUU'
-print(obj.to_set_notation())    # '{0, 1, 5}'
-print(obj.count)                # 56
+# Subtraction
+result = subtract('①⓪①①', '⓪①①⓪')
+print(result)
+# {'result': '①⓪①', 'decimal': 5}
+
+# Bitwise AND
+result = bitwise_and('①⓪①①', '⓪①①⓪')
+print(result)
+# {'result': '⓪⓪①⓪', 'decimal': 2}
 ```
 
-## Fundamental Counting Principles
+## Features
+
+### Arithmetic Operations
+
+- **Addition** - Binary addition with carry propagation
+- **Subtraction** - Binary subtraction with borrow propagation
+- **Multiplication** - *(Coming soon)*
+- **Division** - *(Coming soon)*
+
+### Bitwise Operations
+
+- **AND** (`&`) - ① only if both bits are ①
+- **OR** (`|`) - ① if either bit is ①
+- **XOR** (`^`) - ① if bits differ
+- **NOT** (`~`) - Flip all bits (one's complement)
+
+### Shift Operations
+
+- **Left Shift** (`<<`) - Multiply by 2^n
+- **Right Shift** (`>>`) - Divide by 2^n (with bits lost tracking)
+
+### Conversion Utilities
 
 ```python
-from generators.binomial_generator import count_OR, count_AND, explain_counting_principle
-
-# OR principle (disjoint union) → ADD
-total = count_OR(10, 15, 5)  # 30
-
-# AND principle (cartesian product) → MULTIPLY
-total = count_AND(3, 4, 5)   # 60
-
-# Natural language explanation
-explanation = explain_counting_principle(
-    "AND",
-    [3, 4],
-    ["shirt colors", "pant sizes"]
+from toolkit.binary_notation import (
+    decimal_to_circled_binary,
+    circled_binary_to_decimal
 )
-# Output: "We choose shirt colors AND pant sizes.
-#          Since these are independent choices, we MULTIPLY: 3 × 4 = 12"
+
+# Decimal to binary
+binary = decimal_to_circled_binary(11)
+# '①⓪①①'
+
+# Binary to decimal
+decimal = circled_binary_to_decimal('①⓪①①')
+# 11
 ```
 
 ## Directory Structure
 
 ```
 binarySKILL/
-├── generators/          # Core object generators
-│   ├── binomial_generator.py    # Universal C(n,k) generator
-│   ├── subsets.py               # k-subset generation
-│   ├── words.py                 # Binary strings, Dyck words
-│   ├── permutations.py          # Permutation generation
-│   ├── distributions.py         # Stars and bars
-│   └── functions.py             # Function counting
-├── toolkit/             # Shared utilities
-│   └── combinatorial_toolkit.py # Counting formulas (binomial, factorial, etc.)
-├── templates/           # Training data templates
-├── data/                # Generated training data
-├── tests/               # Unit tests
-├── sandbox/             # Throwaway experiments
-└── docs/                # Documentation
+├── toolkit/                 # Core binary operations
+│   ├── binary_notation.py      # ⓪① notation utilities
+│   └── binary_arithmetic.py    # Arithmetic operations
+├── generators/              # Training data generators
+├── templates/               # Training templates
+├── data/                    # Generated training data
+├── tests/                   # Unit tests
+├── sandbox/                 # Experiments
+└── docs/                    # Documentation
 ```
 
-## Output Formats
+## Operation Reference
 
-The `BinomialObject` class supports 8 output formats:
+### Addition Truth Table
 
-| Format | Example | Use Case |
-|--------|---------|----------|
-| `indices` | `[0, 2, 5, 7]` | Raw k-subset |
-| `binary` | `"10100101"` | Binary string with k ones |
-| `lattice_path` | `"RURUURUU"` | Grid paths (R=right, U=up) |
-| `named_selection` | `["Alice", "Carol", "Eve"]` | Committee problems |
-| `distribution` | `[2, 3, 1, 0, 4]` | Stars and bars |
-| `set_notation` | `"{0, 2, 5, 7}"` | Mathematical notation |
-| `indicator` | `[1,0,1,0,0,1,0,1]` | Characteristic vector |
-| `positions` | `"positions 0, 2, 5, 7"` | Natural language |
+| Bit A | Bit B | Carry In | Sum | Carry Out |
+|-------|-------|----------|-----|-----------|
+| ⓪     | ⓪     | ⓪        | ⓪   | ⓪         |
+| ⓪     | ⓪     | ①        | ①   | ⓪         |
+| ⓪     | ①     | ⓪        | ①   | ⓪         |
+| ⓪     | ①     | ①        | ⓪   | ①         |
+| ①     | ⓪     | ⓪        | ①   | ⓪         |
+| ①     | ⓪     | ①        | ⓪   | ①         |
+| ①     | ①     | ⓪        | ⓪   | ①         |
+| ①     | ①     | ①        | ①   | ①         |
 
-## Context-Specific Generators
+### Bitwise Operations
+
+| Operation | Description | Example |
+|-----------|-------------|---------|
+| `AND` | ① if both bits are ① | `①⓪①① & ⓪①①⓪ = ⓪⓪①⓪` |
+| `OR` | ① if either bit is ① | `①⓪①① \| ⓪①①⓪ = ①①①①` |
+| `XOR` | ① if bits differ | `①⓪①① ^ ⓪①①⓪ = ①①⓪①` |
+| `NOT` | Flip all bits | `~①⓪①① = ⓪①⓪⓪` |
+
+### Shift Operations
 
 ```python
-# Committee selection
-from generators.binomial_generator import generate_committee
+# Left shift (multiply by 2^n)
+left_shift('①⓪①①', 2)  # ①⓪①①⓪⓪ (44)
 
-result = generate_committee(
-    total_people=5,
-    committee_size=3,
-    seed=42,
-    people_names=["Alice", "Bob", "Carol", "Dave", "Eve"]
-)
-# Returns: {
-#   "committee": ["Alice", "Carol", "Eve"],
-#   "not_selected": ["Bob", "Dave"],
-#   "total_ways": 10
-# }
-
-# Lattice paths
-from generators.binomial_generator import generate_lattice_path_problem
-
-result = generate_lattice_path_problem(
-    right_steps=4,
-    up_steps=3,
-    seed=42
-)
-# Returns: {
-#   "path": "RURUURR",
-#   "start": (0, 0),
-#   "end": (4, 3),
-#   "total_paths": 35
-# }
-
-# Stars and bars
-from generators.binomial_generator import generate_stars_and_bars
-
-result = generate_stars_and_bars(
-    num_items=10,
-    num_bins=4,
-    seed=42
-)
-# Returns: {
-#   "distribution": [0, 0, 8, 2],
-#   "num_items": 10,
-#   "num_bins": 4,
-#   "total_ways": 286
-# }
+# Right shift (divide by 2^n)
+right_shift('①⓪①①', 2)  # ①⓪ (2), bits lost: ①①
 ```
 
-## Design Principles
+## Step-by-Step Mode
 
-### 1. Infrastructure vs Templates
+All arithmetic operations support step-by-step explanations:
 
-**Low-level generators** (general-purpose):
-- `subsets.py` - Pure subset generation
-- `words.py` - Pure string generation
-- Reusable across multiple pedagogical contexts
-
-**High-level templates** (specialized pedagogy):
-- Committee selection
-- Lattice path counting
-- Pascal's triangle exploration
-- Each template teaches a specific application of C(n,k)
-
-### 2. Determinism
-
-All generators respect `--seed` for reproducibility:
 ```python
-obj1 = generate_binomial_object_full(10, 4, seed=42)
-obj2 = generate_binomial_object_full(10, 4, seed=42)
-assert obj1.indices == obj2.indices  # ✓ Deterministic
-```
+result = add('①⓪①①', '⓪①①⓪', show_steps=True)
 
-### 3. Bijective Equivalence
-
-All representations are interconvertible:
-```python
-# Start with subset
-obj = generate_binomial_object_full(10, 4, seed=42)
-
-# Convert to binary
-binary = obj.to_binary()
-
-# Convert back
-from generators.words import binary_string_to_subset
-recovered = binary_string_to_subset(binary)
-
-assert recovered == obj.indices  # ✓ Bijection preserved
+# Returns steps showing:
+# - Position
+# - Bit A, Bit B
+# - Carry in/out
+# - Sum bit
 ```
 
 ## Examples
 
-### Example 1: Binary Strings ↔ Subsets
+### Example 1: Binary Addition
 
 ```python
-from generators.binomial_generator import generate_binomial_object_full
+from toolkit.binary_arithmetic import add
 
-obj = generate_binomial_object_full(n=5, k=3, seed=42)
+# Add 11 (①⓪①①) + 6 (⓪①①⓪)
+result = add('①⓪①①', '⓪①①⓪')
 
-print(f"Subset:  {obj.indices}")           # [0, 1, 4]
-print(f"Binary:  {obj.to_binary()}")       # '11001'
-print(f"Path:    {obj.to_lattice_path()}") # 'RRUUU'
-print(f"Set:     {obj.to_set_notation()}") # '{0, 1, 4}'
-print(f"Count:   {obj.count}")             # 10
+print(f"Result: {result['result']}")  # ①⓪⓪⓪①
+print(f"Decimal: {result['decimal']}")  # 17
 ```
 
-### Example 2: Counting with AND/OR
+### Example 2: Bitwise AND
 
 ```python
-from generators.binomial_generator import count_OR, count_AND
+from toolkit.binary_arithmetic import bitwise_and
 
-# Counting outfit combinations (AND)
-shirts = 5
-pants = 3
-outfits = count_AND(shirts, pants)  # 15
+# Mask operation: 1011 & 0110
+result = bitwise_and('①⓪①①', '⓪①①⓪')
 
-# Counting total items (OR)
-red_balls = 3
-blue_balls = 7
-total_balls = count_OR(red_balls, blue_balls)  # 10
+print(f"Result: {result['result']}")  # ⓪⓪①⓪
+print(f"Decimal: {result['decimal']}")  # 2
 ```
 
-### Example 3: Batch Generation
+### Example 3: Left Shift (Multiply by 4)
 
 ```python
-from generators.binomial_generator import generate_binomial_batch
+from toolkit.binary_arithmetic import left_shift
 
-# Generate 100 different C(10,4) objects
-batch = generate_binomial_batch(
-    n=10,
-    k=4,
-    count=100,
-    seed=42,
-    output_format="binary"
-)
-# Returns list of 100 binary strings
+# Shift ①⓪①① left by 2 positions
+result = left_shift('①⓪①①', 2)
+
+print(f"Result: {result['result']}")  # ①⓪①①⓪⓪
+print(f"Decimal: {result['decimal']}")  # 44
 ```
+
+## Training Data Generation
+
+*(Coming soon - generators for creating LLM training data)*
 
 ## Testing
 
-Run tests with:
 ```bash
-python -m pytest tests/
+cd /home/russ/binarySKILL
+PYTHONPATH=. python3 toolkit/binary_arithmetic.py
 ```
+
+## Notation Reference
+
+| Circled | Standard | Decimal |
+|---------|----------|---------|
+| ⓪       | 0        | 0       |
+| ①       | 1        | 1       |
+| ①⓪      | 10       | 2       |
+| ①①      | 11       | 3       |
+| ①⓪⓪     | 100      | 4       |
+| ①⓪①     | 101      | 5       |
+| ①①⓪     | 110      | 6       |
+| ①①①     | 111      | 7       |
+| ①⓪⓪⓪    | 1000     | 8       |
 
 ## License
 
@@ -243,11 +213,9 @@ This is a research project for LLM training data generation. Contributions welco
 
 ## Citation
 
-If you use this in your research, please cite:
-
 ```bibtex
 @software{binarySKILL2025,
-  title={binarySKILL: Universal Binary and Combinatorial Generator},
+  title={binarySKILL: Binary Arithmetic Training with Circled Notation},
   author={Your Name},
   year={2025},
   url={https://github.com/definitelynotrussellkirk-bit/binarySKILL}
