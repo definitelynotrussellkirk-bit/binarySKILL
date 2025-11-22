@@ -1,42 +1,62 @@
 # binarySKILL
 
-**Binary Arithmetic Training with Circled Digit Notation (⓪①)**
+**Binary Arithmetic Training with Circled Digits (⓪①) and Prefix Notation**
 
-Train LLMs to perform binary arithmetic using visually distinct ⓪① notation instead of standard 01. This helps models learn binary as a separate domain from decimal arithmetic.
+Train LLMs to perform binary arithmetic using:
+1. **Circled digits** (⓪①) instead of standard 01
+2. **Prefix notation** (English operation names) instead of infix symbols
 
-## Why Circled Digits?
+## Why This Notation?
 
-Using **⓪** and **①** instead of `0` and `1` makes binary operations visually distinctive:
+### Circled Digits
+
+Using **⓪** and **①** instead of `0` and `1` makes binary visually distinct from decimal:
 
 ```
-Standard binary:  1011 + 0110 = 10001
-Circled binary:   ①⓪①① + ⓪①①⓪ = ①⓪⓪⓪①
+Standard:  1011
+Circled:   ①⓪①①
 ```
 
-This visual separation helps LLMs:
-- Distinguish binary from decimal operations
-- Avoid confusion with standard arithmetic
-- Learn binary-specific reasoning patterns
+### Prefix Notation
+
+Using English operation names in prefix position makes operations unambiguous:
+
+```
+Infix:     ①⓪①① + ⓪①①⓪ = ①⓪⓪⓪①
+Prefix:    add ①⓪①① ⓪①①⓪ = ①⓪⓪⓪①
+```
+
+**Benefits:**
+- **No ambiguity** - No need for parentheses or precedence rules
+- **Visually distinct** - Clearly separates binary from decimal arithmetic
+- **Explicit operations** - Operation names are clear, not symbolic
+- **Functional style** - Familiar to Lisp/functional programming
+- **Easy to parse** - Straightforward expression evaluation
 
 ## Quick Start
 
 ```python
-from toolkit.binary_arithmetic import add, subtract, bitwise_and
+from toolkit.prefix_notation import add, subtract, and_op, parse_prefix_expression
 
-# Addition
+# Addition with prefix notation
 result = add('①⓪①①', '⓪①①⓪')
-print(result)
-# {'result': '①⓪⓪⓪①', 'decimal': 17}
+print(result['prefix'])
+# add ①⓪①① ⓪①①⓪ = ①⓪⓪⓪①
 
 # Subtraction
 result = subtract('①⓪①①', '⓪①①⓪')
-print(result)
-# {'result': '①⓪①', 'decimal': 5}
+print(result['prefix'])
+# subtract ①⓪①① ⓪①①⓪ = ①⓪①
 
 # Bitwise AND
-result = bitwise_and('①⓪①①', '⓪①①⓪')
+result = and_op('①⓪①①', '⓪①①⓪')
+print(result['prefix'])
+# and ①⓪①① ⓪①①⓪ = ⓪⓪①⓪
+
+# Parse prefix expressions
+result = parse_prefix_expression('add ①⓪①① ⓪①①⓪')
 print(result)
-# {'result': '⓪⓪①⓪', 'decimal': 2}
+# {'result': '①⓪⓪⓪①', 'decimal': 17, 'prefix': 'add ①⓪①① ⓪①①⓪ = ①⓪⓪⓪①'}
 ```
 
 ## Features
@@ -83,7 +103,9 @@ decimal = circled_binary_to_decimal('①⓪①①')
 binarySKILL/
 ├── toolkit/                 # Core binary operations
 │   ├── binary_notation.py      # ⓪① notation utilities
-│   └── binary_arithmetic.py    # Arithmetic operations
+│   ├── binary_arithmetic.py    # Low-level arithmetic operations
+│   ├── prefix_notation.py      # Prefix notation interface (recommended)
+│   └── binary_ops.py           # Legacy operations (standard 01)
 ├── generators/              # Training data generators
 ├── templates/               # Training templates
 ├── data/                    # Generated training data
@@ -91,6 +113,27 @@ binarySKILL/
 ├── sandbox/                 # Experiments
 └── docs/                    # Documentation
 ```
+
+## Prefix Notation Syntax
+
+All operations use **operation-first** syntax:
+
+```
+add ①⓪①① ⓪①①⓪ = ①⓪⓪⓪①
+subtract ①⓪①① ⓪①①⓪ = ①⓪①
+and ①⓪①① ⓪①①⓪ = ⓪⓪①⓪
+or ①⓪①① ⓪①①⓪ = ①①①①
+xor ①⓪①① ⓪①①⓪ = ①①⓪①
+not ①⓪①① = ⓪①⓪⓪
+leftshift ①⓪①① 2 = ①⓪①①⓪⓪
+rightshift ①⓪①① 2 = ①⓪
+```
+
+**Advantages over infix:**
+- No operator precedence rules needed
+- No parentheses for grouping
+- Unambiguous parsing
+- Natural for functional composition
 
 ## Operation Reference
 
@@ -142,40 +185,58 @@ result = add('①⓪①①', '⓪①①⓪', show_steps=True)
 
 ## Examples
 
-### Example 1: Binary Addition
+### Example 1: Binary Addition (Prefix Notation)
 
 ```python
-from toolkit.binary_arithmetic import add
+from toolkit.prefix_notation import add
 
 # Add 11 (①⓪①①) + 6 (⓪①①⓪)
 result = add('①⓪①①', '⓪①①⓪')
 
-print(f"Result: {result['result']}")  # ①⓪⓪⓪①
+print(result['prefix'])
+# add ①⓪①① ⓪①①⓪ = ①⓪⓪⓪①
+
 print(f"Decimal: {result['decimal']}")  # 17
 ```
 
-### Example 2: Bitwise AND
+### Example 2: Bitwise AND (Prefix Notation)
 
 ```python
-from toolkit.binary_arithmetic import bitwise_and
+from toolkit.prefix_notation import and_op
 
-# Mask operation: 1011 & 0110
-result = bitwise_and('①⓪①①', '⓪①①⓪')
+# Mask operation
+result = and_op('①⓪①①', '⓪①①⓪')
 
-print(f"Result: {result['result']}")  # ⓪⓪①⓪
+print(result['prefix'])
+# and ①⓪①① ⓪①①⓪ = ⓪⓪①⓪
+
 print(f"Decimal: {result['decimal']}")  # 2
 ```
 
-### Example 3: Left Shift (Multiply by 4)
+### Example 3: Left Shift (Prefix Notation)
 
 ```python
-from toolkit.binary_arithmetic import left_shift
+from toolkit.prefix_notation import leftshift
 
-# Shift ①⓪①① left by 2 positions
-result = left_shift('①⓪①①', 2)
+# Multiply by 4 (shift left by 2)
+result = leftshift('①⓪①①', 2)
 
-print(f"Result: {result['result']}")  # ①⓪①①⓪⓪
+print(result['prefix'])
+# leftshift ①⓪①① 2 = ①⓪①①⓪⓪
+
 print(f"Decimal: {result['decimal']}")  # 44
+```
+
+### Example 4: Parsing Prefix Expressions
+
+```python
+from toolkit.prefix_notation import parse_prefix_expression
+
+# Parse and evaluate a prefix expression
+result = parse_prefix_expression('xor ①⓪①① ⓪①①⓪')
+
+print(result['prefix'])
+# xor ①⓪①① ⓪①①⓪ = ①①⓪①
 ```
 
 ## Training Data Generation
